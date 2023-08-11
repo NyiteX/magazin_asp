@@ -1,0 +1,452 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<style>
+    /*body {
+        background-image: url(https://cdn.pixabay.com/photo/2016/10/04/12/17/white-1714170_640.jpg);
+        background-size: cover;
+    }*/
+
+    ul {
+        display: flex;
+        flex-wrap: wrap;
+        /*background-image: image(https://cdn.pixabay.com/photo/2023/07/07/16/22/flower-8113006_640.jpg);*/
+    }
+
+    li {
+        width: 200px;
+        /*height: 300px;*/
+    }
+
+    #message {
+        height: 200px;
+    }
+
+    h2 {
+        text-align: center;
+    }
+
+    #mainDiv {
+        background-color: rgba(220, 220, 220, 0.5);
+    }
+    #mainDiv h2 {
+        color: black;
+        -webkit-text-stroke: 1px rgba(200, 200, 150, 0.5);
+    }
+
+    #headerDiv {
+        display: flex;
+        flex-wrap: wrap;
+        
+        background-image: url(https://cdn.pixabay.com/photo/2016/10/04/12/17/white-1714170_640.jpg);
+        background-size: cover;
+    }
+
+    #inputsDiv {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        min-width: 200px;
+        max-width: 700px;
+    }
+
+        #inputsDiv p {
+            margin-left: 10%;
+        }
+
+        #inputsDiv input {
+            padding: 0px;
+            width: 90%;
+            min-width: 100px;
+        }
+
+    #btnsDiv p {
+        display: flex;
+    }
+
+    #checkbox {
+        margin-left: 20px;
+        margin-top: 20px;
+    }
+    .imgTovar {
+        height: 60%;
+        width: 90%;
+        object-fit: cover;
+    }
+</style>
+<body>
+
+    <div id="headerDiv">
+        <h3>Админ окно</h3>
+        <div id="inputsDiv">
+            <input type="hidden" id="tovarId" name="id" />
+            <p>
+                Name: </br>
+                <input id="tovarName" maxlength="10" name="name" />
+            </p>
+            <p>
+                Price: </br>
+                <input id="tovarPrice" type="number" min="0" value="0" max="999999999" name="price" />
+            </p>
+            <p>
+                Count: </br>
+                <input id="tovarCount" type="number" min="1" value="1" max="999999999" name="count" />
+            </p>
+            <p>
+                Description: </br>
+                <input id="tovarDescription" maxlength="20" name="discription" />
+            </p>
+            <p>
+                Picture: <br />
+                <input id="tovarUrl" type="file" accept="image/*" name="url" />
+            </p>
+        </div>
+
+        <div id="korzina">
+            <ul id="list_korzina"></ul>
+        </div>
+    </div>   
+
+    <div id="btnsDiv">
+        <button id="saveBtn">Save</button>
+        <button id="resetBtn">Reset</button>
+        <input id="checkbox" type="checkbox" />
+        <label>Edit mode</label>
+        <!--<p>
+            <button id="fastCreatebtn">Create 5 items</button>
+        </p>-->
+    </div>
+
+    <div id="mainDiv">
+        <h2>Список товаров</h2>
+        <ul id="list"></ul>
+    </div>
+
+
+    <div id="message"></div>
+
+    <script>
+
+        async function getTovars() {
+
+            const response = await fetch("/api/tovars", {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            });
+
+            if (response.ok === true) {
+
+                const tovars = await response.json();
+                const rows = document.getElementById("list");
+
+                tovars.forEach(tovar => rows.append(row(tovar)));
+            }
+        }
+
+        async function getTovar(id) {
+            const response = await fetch(`/api/tovars/${id}`, {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            });
+            if (response.ok === true) {
+
+                const tovar = await response.json();
+                document.getElementById("tovarId").value = tovar.id;
+                document.getElementById("tovarName").value = tovar.name;
+                document.getElementById("tovarPrice").value = tovar.price;
+                document.getElementById("tovarCount").value = tovar.count;
+                document.getElementById("tovarDescription").value = tovar.discription;
+                document.getElementById("tovarUrl").value = tovar.url;
+            }
+            else {
+                const error = await response.json();
+                console.log(error.message);
+            }
+        }
+
+        async function createTovar(tovarName, tovarPrice, tovarDescription, tovarCount, tovarUrl) {
+            if (tovarName.length == 0 || tovarPrice < 0 || tovarCount < 0 || tovarDescription.length == 0) {
+                alert("нужно заполнить все поля")
+                return;
+            }
+            const response = await fetch("api/tovars", {
+                method: "POST",
+                headers: { "Accept": "application/json", "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: tovarName,
+                    discription: tovarDescription,
+                    price: parseFloat(tovarPrice),
+                    count: parseInt(tovarCount),
+                    url: tovarUrl
+                })
+            });
+
+            if (response.ok === true) {
+                const tovar = await response.json();
+                document.getElementById("list").append(row(tovar));
+            }
+            else {
+                const error = await response.json();
+                console.log(error.message);
+            }
+        }
+
+
+        async function editTovar(tovarId, tovarName, tovarPrice, tovarDescription, tovarCount, tovarUrl) {
+            const response = await fetch("api/tovars", {
+                method: "PUT",
+                headers: { "Accept": "application/json", "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: tovarId,
+                    name: tovarName,
+                    price: parseFloat(tovarPrice),
+                    discription: tovarDescription,
+                    count: parseInt(tovarCount, 10),
+                    url: tovarUrl
+                })
+            });
+            if (response.ok === true) {
+                const tovar = await response.json();
+                document.querySelector(`li[data-rowid='${tovar.id}']`).replaceWith(row(tovar));
+            }
+            else {
+                const error = await response.json();
+                console.log(error.message);
+            }
+        }
+
+        async function deleteTovar(id) {
+            const response = await fetch(`api/tovars/${id}`, {
+                method: "DELETE",
+                headers: { "Accept": "application/json" },
+            });
+            if (response.ok === true) {
+
+                const tovar = await response.json();
+                document.querySelector(`li[data-rowid= '${tovar.id}']`).remove();
+
+            }
+            else {
+                const error = await response.json();
+                console.log(error.message);
+            }
+        }
+
+
+        function reset() {
+            document.getElementById("tovarId").value = ""
+            document.getElementById("tovarName").value = ""
+            document.getElementById("tovarPrice").value = 0;
+            document.getElementById("tovarDescription").value = "";
+            document.getElementById("tovarCount").value = 1;
+            document.getElementById("tovarUrl").value = "";
+        }
+        function clearList(elementName) {
+            const folders = document.getElementById(elementName);
+            const children = Array.from(folders.children);
+
+            children.forEach(child => child.remove());
+        }
+        async function buyTovar(id) {
+            const response = await fetch(`/api/tovars/${id}`, {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            });
+            if (response.ok === true) {
+
+                const tovar = await response.json();
+                const tovarid = tovar.id;
+                const tovarname = tovar.name;
+                const tovarprice = tovar.price;
+                const tovarcount = tovar.count;
+                const tovardiscription = tovar.discription;
+                const tovarurl = tovar.url;
+                if (tovarcount < 1) { alert("Товара нет в наличии"); return; }
+
+                var count = parseInt(prompt("Сколько купить ?"));
+                if (tovarcount - count < 0 || count < 1 || isNaN(count)) {
+                    alert("Неправильно указано кол-во.")
+                    return;
+                }
+
+                await editTovar(tovarid, tovarname, tovarprice, tovardiscription, tovarcount - count, tovarurl)
+            }
+            else {
+                const error = await response.json();
+                console.log(error.message);
+            }
+        }
+
+        function row(tovar) {
+            const li = document.createElement("li");
+            li.setAttribute("data-rowid", tovar.id);
+            li.style.listStyle = "none";
+            li.style.margin = "5px";
+            li.style.marginBottom = "50px";
+            li.style.backgroundColor = "lightgrey";
+
+            const containerDiv = document.createElement("div");
+            containerDiv.style.display = "flex";
+            containerDiv.style.flexDirection = "column";
+            containerDiv.style.alignItems = "center";
+            containerDiv.style.height = "80%";
+            containerDiv.style.border = "1px solid black";
+            containerDiv.style.borderBottom = "0px";
+            containerDiv.style.borderRadius = "0px 25px 0px 0px";
+
+
+            const nameSpan = document.createElement("h2");
+            nameSpan.append(tovar.name);
+            containerDiv.append(nameSpan);
+
+            const img = document.createElement("img");
+            img.src = "data:image/ico;base64," + tovar.url;
+            img.alt = "Пикча товара";
+            img.classList.add("imgTovar");
+
+            containerDiv.append(img);
+
+            const priceSpan = document.createElement("span");
+            priceSpan.style.fontSize = "20px";
+            priceSpan.style.fontWeight = "bold";
+
+            priceSpan.append("цена: " + tovar.price);
+            containerDiv.append(priceSpan);
+
+            const countSpan = document.createElement("span");
+            if (tovar.count > 0) {
+                countSpan.append("Кол-во: " + tovar.count);
+                countSpan.style.color = "green";
+            }
+            else {
+                countSpan.append("Нет в наличии.");
+                countSpan.style.color = "red";
+            }
+            containerDiv.append(countSpan);
+
+            //
+            const containerDiv2 = document.createElement("div");
+            containerDiv2.style.display = "flex";
+            containerDiv2.style.flexDirection = "column";
+            containerDiv2.style.alignItems = "center";
+            containerDiv2.style.height = "20%";
+            containerDiv2.style.border = "1px solid black";
+            containerDiv2.style.borderTop = "1px dashed black";
+            containerDiv2.style.borderRadius = "0px 0px 0px 25px";
+
+            const discSpan = document.createElement("label");
+            discSpan.append(tovar.discription);
+            containerDiv2.append(discSpan);
+
+            const linksDiv = document.createElement("div");
+            linksDiv.style.display = "flex";
+            linksDiv.style.justifyContent = "center";
+
+            const editLink = document.createElement("button");
+            editLink.style.backgroundColor = "green";
+            editLink.style.color = "white";
+            editLink.style.borderRadius = "15px";
+            editLink.style.marginTop = "15px";
+            editLink.append("Купить");
+            editLink.addEventListener("click", async () => await buyTovar(tovar.id));
+
+
+            const removeLink = document.createElement("button");
+            removeLink.style.backgroundColor = "red";
+            removeLink.style.color = "white";
+            removeLink.style.borderRadius = "15px";
+            removeLink.style.marginTop = "15px";
+            removeLink.append("Удалить");
+            removeLink.addEventListener("click", async () => await deleteTovar(tovar.id));
+
+            const admineditlink = document.createElement("button");
+            admineditlink.style.backgroundColor = "yellowgreen";
+            admineditlink.style.color = "white";
+            admineditlink.style.borderRadius = "15px";
+            admineditlink.style.marginTop = "15px";
+            admineditlink.append("Изменить");
+            admineditlink.addEventListener("click", async () => await getTovar(tovar.id));
+
+
+
+            const chkbox = document.getElementById("checkbox").checked;
+            if (chkbox) {
+                linksDiv.append(admineditlink);
+                linksDiv.append(removeLink);
+            }
+            else {
+                linksDiv.append(editLink);
+            }
+
+            li.appendChild(containerDiv);
+            li.appendChild(containerDiv2);
+            li.appendChild(linksDiv);
+            li.style.borderRadius = "0px 25px 0px 25px";
+
+            return li;
+        }
+
+        function getBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = (error) => reject(error);
+            });
+        }
+
+
+        document.getElementById("resetBtn").addEventListener("click", () => reset());
+
+
+        document.getElementById("saveBtn").addEventListener("click", async () => {
+            const id = document.getElementById("tovarId").value;
+            const name = document.getElementById("tovarName").value;
+            const price = document.getElementById("tovarPrice").value;
+            const tovarcount = document.getElementById("tovarCount").value;
+            const description = document.getElementById("tovarDescription").value;
+            const tovarUrlInput = document.getElementById("tovarUrl");
+            const url = tovarUrlInput.files[0];
+            const pictureUrl = await getBase64(url);
+            /*document.getElementById("message").innerText = pictureUrl.split(",")[1];*/
+
+            if (id === "")
+                await createTovar(name, price, description, tovarcount, pictureUrl.split(",")[1])
+            else
+                await editTovar(id, name, price, description, tovarcount, pictureUrl.split(",")[1])
+            reset();
+        })
+
+
+/*        document.getElementById("fastCreatebtn").addEventListener("click", async () => {
+            reset();
+            clearList("list");
+
+            getTovars();
+        })*/
+
+        getTovars();
+
+        var maxLength = 9;
+        document.getElementById("tovarCount").oninput = function () {
+            if (this.value.length > maxLength) {
+                this.value = this.value.slice(0, maxLength);
+            }
+        }
+        document.getElementById("tovarPrice").oninput = function () {
+            if (this.value.length > maxLength) {
+                this.value = this.value.slice(0, maxLength);
+            }
+        }
+        document.getElementById("checkbox").onclick = function () {
+
+            clearList("list");
+            getTovars();
+        }
+
+    </script>
+</body>
+</html>
