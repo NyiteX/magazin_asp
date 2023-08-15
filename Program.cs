@@ -60,11 +60,15 @@ app.MapGet("/login", async (HttpContext context) =>
 </body>
 </html>";
     await context.Response.WriteAsync(loginForm);
+    await Console.Out.WriteLineAsync("-------------------LOGIN_GET");
+    /*context.Response.Redirect("/login.html");
+    return Task.CompletedTask;*/
 });
 
 
 app.MapPost("/login", async (string returnUrl, HttpContext context) =>
 {
+    await Console.Out.WriteLineAsync("-------------------LOGIN_POST");
     var form = context.Request.Form;
 
     if (!form.ContainsKey("email") || !form.ContainsKey("password"))
@@ -94,10 +98,11 @@ app.MapGet("/logout", async (HttpContext context) =>
 });
 
 
-/*app.Map("/", [Authorize] (ctx) => {
+app.Map("/", [Authorize] (ctx) =>
+{
     ctx.Response.Redirect("/index.html");
     return Task.CompletedTask;
-});*/
+});
 
 app.MapGet("/api/tovars", async (ApplicationContext db) =>
 {

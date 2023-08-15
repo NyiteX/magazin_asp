@@ -76,11 +76,17 @@
         width: 90%;
         object-fit: cover;
     }
+    #korzina{
+        display:flex;
+        background-color: dimgray;
+        width:45%;
+        height:350px;
+    }
 </style>
 <body>
 
     <div id="headerDiv">
-        <h3>Админ окно</h3>
+        <h3>Admin panel</h3>
         <div id="inputsDiv">
             <input type="hidden" id="tovarId" name="id" />
             <p>
@@ -106,6 +112,7 @@
         </div>
 
         <div id="korzina">
+            <h3>Korzina</h3>
             <ul id="list_korzina"></ul>
         </div>
     </div>   
@@ -121,7 +128,7 @@
     </div>
 
     <div id="mainDiv">
-        <h2>Список товаров</h2>
+        <h2>Product List</h2>
         <ul id="list"></ul>
     </div>
 
@@ -264,11 +271,11 @@
                 const tovarcount = tovar.count;
                 const tovardiscription = tovar.discription;
                 const tovarurl = tovar.url;
-                if (tovarcount < 1) { alert("Товара нет в наличии"); return; }
+                if (tovarcount < 1) { alert("Not avaible"); return; }
 
-                var count = parseInt(prompt("Сколько купить ?"));
+                var count = parseInt(prompt("How many?"));
                 if (tovarcount - count < 0 || count < 1 || isNaN(count)) {
-                    alert("Неправильно указано кол-во.")
+                    alert("Wrong count.")
                     return;
                 }
 
@@ -304,7 +311,7 @@
 
             const img = document.createElement("img");
             img.src = "data:image/ico;base64," + tovar.url;
-            img.alt = "Пикча товара";
+            img.alt = "Product picture";
             img.classList.add("imgTovar");
 
             containerDiv.append(img);
@@ -313,16 +320,16 @@
             priceSpan.style.fontSize = "20px";
             priceSpan.style.fontWeight = "bold";
 
-            priceSpan.append("цена: " + tovar.price);
+            priceSpan.append("Price: " + tovar.price);
             containerDiv.append(priceSpan);
 
             const countSpan = document.createElement("span");
             if (tovar.count > 0) {
-                countSpan.append("Кол-во: " + tovar.count);
+                countSpan.append("Count: " + tovar.count);
                 countSpan.style.color = "green";
             }
             else {
-                countSpan.append("Нет в наличии.");
+                countSpan.append("Not avaible.");
                 countSpan.style.color = "red";
             }
             containerDiv.append(countSpan);
@@ -350,7 +357,7 @@
             editLink.style.color = "white";
             editLink.style.borderRadius = "15px";
             editLink.style.marginTop = "15px";
-            editLink.append("Купить");
+            editLink.append("Buy");
             editLink.addEventListener("click", async () => await buyTovar(tovar.id));
 
 
@@ -359,7 +366,7 @@
             removeLink.style.color = "white";
             removeLink.style.borderRadius = "15px";
             removeLink.style.marginTop = "15px";
-            removeLink.append("Удалить");
+            removeLink.append("Remove");
             removeLink.addEventListener("click", async () => await deleteTovar(tovar.id));
 
             const admineditlink = document.createElement("button");
@@ -367,7 +374,7 @@
             admineditlink.style.color = "white";
             admineditlink.style.borderRadius = "15px";
             admineditlink.style.marginTop = "15px";
-            admineditlink.append("Изменить");
+            admineditlink.append("Edit");
             admineditlink.addEventListener("click", async () => await getTovar(tovar.id));
 
 

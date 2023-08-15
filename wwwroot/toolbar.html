@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>    
+</head>
+<style>
+    #headerDiv {
+        display: flex;
+        flex-wrap: wrap;
+        background-image: url(https://cdn.pixabay.com/photo/2016/10/04/12/17/white-1714170_640.jpg);
+        background-size: cover;
+    }
+    #inputsDiv {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        min-width: 200px;
+        max-width: 700px;
+    }
+</style>
+<body>
+    <div id="headerDiv">
+        <h3>Админ окно</h3>
+        <div id="inputsDiv">
+            <input type="hidden" id="tovarId" name="id" />
+            <p>
+                Name: </br>
+                <input id="tovarName" maxlength="10" name="name" />
+            </p>
+            <p>
+                Price: </br>
+                <input id="tovarPrice" type="number" min="0" value="0" max="999999999" name="price" />
+            </p>
+            <p>
+                Count: </br>
+                <input id="tovarCount" type="number" min="1" value="1" max="999999999" name="count" />
+            </p>
+            <p>
+                Description: </br>
+                <input id="tovarDescription" maxlength="20" name="discription" />
+            </p>
+            <p>
+                Picture: <br />
+                <input id="tovarUrl" type="file" accept="image/*" name="url" />
+            </p>
+        </div>
+    </div>
+</body>
+</html>
